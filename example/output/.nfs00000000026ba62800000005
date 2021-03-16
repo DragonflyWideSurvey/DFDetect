@@ -1,0 +1,69 @@
+2021-03-16 11:51:18,269 Running Multi-Resolution Filtering (MRF) on "decals" and "df" images!
+2021-03-16 11:51:18,277 Subtract BACKVAL=706.1 of Dragonfly image
+2021-03-16 11:51:18,286 Magnify Dragonfly image with a factor of 3.0:
+2021-03-16 11:51:20,380 Register high resolution image "/netb/dokkum/data/DWFS/decals_frames/tile_223.647_1.376_decals_cutout_g.fits" with "/netb/dokkum/data/DWFS/tile_frames/tile_223.647_1.376_g.fits"
+2021-03-16 11:51:32,153 Register high resolution image "/netb/dokkum/data/DWFS/decals_frames/tile_223.647_1.376_decals_cutout_r.fits" with "/netb/dokkum/data/DWFS/tile_frames/tile_223.647_1.376_g.fits"
+2021-03-16 11:51:43,910 Build flux models on high-resolution images: Blue band
+2021-03-16 11:51:43,911     - sigma = 2.0, minarea = 5
+2021-03-16 11:51:43,912     - deblend_cont = 0.00500, deblend_nthres = 32.0
+2021-03-16 11:51:46,029     - Detect 8991 objects
+2021-03-16 11:51:50,715 Build flux models on high-resolution images: Red band
+2021-03-16 11:51:50,716     - sigma = 2.0, minarea = 5
+2021-03-16 11:51:50,717     - deblend_cont = 0.00500, deblend_nthres = 32.0
+2021-03-16 11:51:52,813     - Detect 9954 objects
+2021-03-16 11:51:57,686 Make color correction to blue band, remove artifacts as well
+2021-03-16 11:51:58,407     - color_term = 0.03
+2021-03-16 11:51:58,422     - median_color (blue/red) = 0.52866
+2021-03-16 11:52:00,164 Extract objects from color-corrected high resolution image with:
+2021-03-16 11:52:00,165     - sigma = 2.0, minarea = 5
+2021-03-16 11:52:00,166     - deblend_cont = 0.00500, deblend_nthres = 32.0
+2021-03-16 11:52:02,243     - Detect 9025 objects
+2021-03-16 11:52:02,545 Remove bright stars from this segmentation map, using SEP results.
+2021-03-16 11:52:02,546     - Bright star limit = 16
+2021-03-16 11:52:04,217     - 158 stars removed. 
+2021-03-16 11:52:17,218 Flux model from high resolution image has been built.
+2021-03-16 11:52:17,265 Build convolving kernel to degrade high resolution image.
+2021-03-16 11:52:17,384     - Rejected Object 1: flux deviation = 5.433
+2021-03-16 11:52:17,712     - Rejected Object 10: flux deviation = 1.928
+2021-03-16 11:52:18,370     - Rejected Object 28: flux deviation = 0.832
+2021-03-16 11:52:19,136     - You have 47 good stars to generate the median kernel
+2021-03-16 11:52:19,828 findfont: Font family ['sans-serif'] not found. Falling back to DejaVu Sans.
+2021-03-16 11:52:26,929     - Convolving image, this could be a bit slow @_@
+2021-03-16 11:52:30,468     - Removing low-SB objects (SB > 20) from flux model.
+2021-03-16 11:52:30,621     - Kernel flux = 82.62817936940394
+2021-03-16 11:52:30,627     - Maximum of flux_model / conv_model = 440737.446
+2021-03-16 11:52:30,678     - SB limit in counts / pixel = 6.9444
+2021-03-16 11:52:32,074     - Removed 78 low surface brightness objects from flux model.
+2021-03-16 11:52:45,343     - Convolving image, this could be a bit slow @_@
+2021-03-16 11:52:49,858 Compact objects has been subtracted from low-resolution image! Saved as "./output/g_res.fits".
+2021-03-16 11:52:49,877 Extract objects from compact-object-subtracted low-resolution image with:
+2021-03-16 11:52:49,877     - sigma = 4.0, minarea = 5
+2021-03-16 11:52:49,878     - deblend_cont = 0.00500, deblend_nthres = 32.0
+2021-03-16 11:52:49,987     - Detect 533 objects
+2021-03-16 11:52:50,002 Stack stars to get PSF model!
+2021-03-16 11:52:50,003     - Match detected objects with previously discard stars
+2021-03-16 11:52:50,062     - Get 15 stars to be stacked!
+2021-03-16 11:52:50,333     - Stars are stacked successfully!
+2021-03-16 11:52:50,482 Wide-PSF parameters:
+2021-03-16 11:52:50,483     - n=array([3.44, 2.89, 2.07, 4.  ])
+2021-03-16 11:52:50,484     - theta=array([   5. ,   64.6,  117.5, 1200. ])
+2021-03-16 11:52:50,886 Draw star halo models onto the image, and subtract them!
+2021-03-16 11:52:51,052 findfont: Font family ['sans-serif'] not found. Falling back to DejaVu Sans.
+2021-03-16 11:52:56,035 Bright star halos are subtracted!
+2021-03-16 11:52:56,036 Clean the image!
+2021-03-16 11:52:56,410     - Replace artifacts with void.
+2021-03-16 11:52:56,626 The final result is saved as "./output/g_final.fits"!
+2021-03-16 11:52:56,626 The mask is saved as "./output/g_mask.fits"!
+2021-03-16 11:52:56,627 Delete all temporary files!
+2021-03-16 11:52:57,012 Determine surface brightness detection limit
+2021-03-16 11:52:57,014     - Binning factors: dx = 24, dy = 24
+2021-03-16 11:52:57,014     - Used bin area / True bin area = 1.00000
+2021-03-16 11:52:57,827     - 1.0-sigma variation in counts = 0.3331 +- 0.0091
+2021-03-16 11:52:57,828     - 1.0-sigma surface brightness limit on 60 arcsec scale is 30.4832 +- 0.0412
+2021-03-16 11:52:58,103 findfont: Font family ['sans-serif'] not found. Falling back to DejaVu Sans.
+2021-03-16 11:52:58,107 findfont: Font family ['sans-serif'] not found. Falling back to DejaVu Sans.
+2021-03-16 11:53:02,110 Task finished! (⁎⁍̴̛ᴗ⁍̴̛⁎)
+2021-03-16 11:53:20,839 findfont: Font family ['cursive'] not found. Falling back to DejaVu Sans.
+2021-03-16 11:53:20,841 findfont: Font family ['sans'] not found. Falling back to DejaVu Sans.
+2021-03-16 11:53:20,844 findfont: Font family ['sans'] not found. Falling back to DejaVu Sans.
+2021-03-16 11:53:20,847 findfont: Font family ['sans'] not found. Falling back to DejaVu Sans.

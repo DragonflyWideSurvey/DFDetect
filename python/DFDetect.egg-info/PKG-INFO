@@ -1,0 +1,10 @@
+Metadata-Version: 1.2
+Name: DFDetect
+Version: 0.0.1
+Summary: Source Detection Tools for the Dragonfly Wide Field Survey
+Home-page: UNKNOWN
+Author: Tim Miller, Shany Danieli
+License: UNKNOWN
+Description: UNKNOWN
+Platform: UNKNOWN
+Requires-Python: >=3.7

@@ -1,0 +1,9 @@
+setup.py
+DFDetect/DWFS_mrf.py
+DFDetect/df_decals_g.yaml
+DFDetect/df_decals_r.yaml
+DFDetect/run_DWFS_mrf.py
+DFDetect.egg-info/PKG-INFO
+DFDetect.egg-info/SOURCES.txt
+DFDetect.egg-info/dependency_links.txt
+DFDetect.egg-info/top_level.txt

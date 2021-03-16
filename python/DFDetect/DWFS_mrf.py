@@ -69,7 +69,7 @@ def run_mrf_tile(tile_name, mrf_dir, band, yaml_file = None, use_two_bands = Tru
         print ('Will download MAST catalog')
     
     if not os.path.exists(mrf_dir):
-        os.makedir(mrf_dir)
+        os.mkdir(mrf_dir)
     
     #run mrf
     task = MrfTask(yaml_file)
@@ -100,7 +100,7 @@ def run_mrf_tile(tile_name, mrf_dir, band, yaml_file = None, use_two_bands = Tru
     if copy_to_final:
         shutil.copy(mrf_dir + '%s_final.fits'%band.lower(), final_dir + '%s_%s_final.fits'%(tile_name,band.lower()) )
         print ("Copied mrf'd frame to final_dir")
-    return results, 
+    return results 
 
 def set_up_mrf_field(fied_name, save_dir, size = 1, overlap = 0.5):
     '''

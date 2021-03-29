@@ -19,7 +19,7 @@ from unagi import hsc,task
 pdr2 = hsc.Hsc(dr='pdr2',rerun = 'pdr2_wide')
 
 
-def detect_sources(data,snr, band, wcs_cur, mask = None, search_sdss = True, search_radius = 4.,sep_bkg_kwargs = {}, sep_extract_kwargs = {}, plot_sources = True, save_plot = None):
+def detect_sources(data,snr, band, wcs_cur, mask = None, search_sdss = True, search_radius = 4.,sep_bkg_kwargs = {}, sep_extract_kwargs = {}, plot_sources = True, save_plot = None,photo_z = True):
     """
     Function used to detect sources in DF images and search for counterparts in the SDSS database
     
@@ -37,9 +37,12 @@ def detect_sources(data,snr, band, wcs_cur, mask = None, search_sdss = True, sea
         mask: 2D Array (optional)
             2D array containg pixels to be masked
         
+        
         search_sdss: bool (optional)
             Whether to search sdss database for counterparts to detects sources, default True.
             if False then speeds up function call
+        photo_z: bool (optional)
+            Wether to search SDSS photoz database as backup for galaxies without specz
         search_radius: float (optional)
             Radius to search for counterparts in arcsec, defualt 4
         sep_bkg_kwargs: dict (optional)
@@ -62,7 +65,8 @@ def detect_sources(data,snr, band, wcs_cur, mask = None, search_sdss = True, sea
     bkg = sep.Background(data, mask=mask, **sep_bkg_kwargs)
     obj_tab = sep.extract(data - bkg.back(), snr, err=bkg.rms(), **sep_extract_kwargs )
     obj_pd = pd.DataFrame(obj_tab)
-    
+    obj_pd['x']
+    obj_pd['y']
     
     #####
     # Run simple cuts to remove unwanted sources 
@@ -77,7 +81,7 @@ def detect_sources(data,snr, band, wcs_cur, mask = None, search_sdss = True, sea
         obj_pd = obj_pd.query('mask_phot < 1')
 
     obj_pd = obj_pd.reset_index(drop = True)
-    coord_all =  pixel_to_skycoord(obj_pd['x'], obj_pd['y'], wcs_cur)
+    coord_all =  pixel_to_skycoord(obj_pd['x']+1, obj_pd['y']+1, wcs_cur)
     
     obj_pd['ra'] = coord_all.ra.deg
     obj_pd['dec'] = coord_all.dec.deg
@@ -96,7 +100,7 @@ def detect_sources(data,snr, band, wcs_cur, mask = None, search_sdss = True, sea
         gal_specobjid = []
         
         for i, obj in obj_pd.iterrows():
-            coord = pixel_to_skycoord(obj['x'], obj['y'], wcs_cur )
+            coord = pixel_to_skycoord(obj['x']+1, obj['y']+1, wcs_cur )
             tab = SDSS.query_region(coord, radius = search_radius*u.arcsec,photoobj_fields = ['ra','dec','objid','mode','type', 'psfMag_g', 'psfMag_r'])
     
             if tab is None:
@@ -147,11 +151,21 @@ def detect_sources(data,snr, band, wcs_cur, mask = None, search_sdss = True, sea
         obj_pd['star_near'] = star_near
         obj_pd['gal_near'] = gal_near
         obj_pd['star_mag'] = star_mag
-        obj_pd['gal_z'] = gal_z
+        obj_pd['gal_spec_z'] = gal_z
         obj_pd['gal_log_ms'] = gal_log_ms
         obj_pd['gal_photoobjid'] =  gal_photoobjid
         obj_pd['gal_specobjid'] = gal_specobjid
     
+    
+    if photo_z and search_sdss:
+        to_query = 'Select objID as gal_photoobjid,z as gal_phot_z, zErr as gal_phot_z_err from Photoz where objID in ('
+        to_add = ['%i ,'%id_cur for id_cur in obj_pd.query('gal_near == True').reset_index()['gal_photoobjid']]
+        to_query = to_query + ''.join(to_add)[:-1] + ')'
+        phz_tab = SDSS.query_sql(to_query)
+        obj_pd = obj_pd.join( phz_tab.to_pandas().set_index('gal_photoobjid'), on = 'gal_photoobjid')
+        obj_pd['gal_phot_z'] = obj_pd['gal_phot_z'].replace(np.nan,int(-99))
+        obj_pd['gal_phot_z_err'] = obj_pd['gal_phot_z_err'].replace(np.nan,int(-99))
+
     if plot_sources:
         fig, ax = plt.subplots(figsize = (15,15))
         data_sub = data - bkg.back()
@@ -208,12 +222,21 @@ def plot_cutouts(res, obj_pd, decals_fits, save_name = None, df_size = 50, hr_si
     i = 0
     
     for i,obj in obj_pd.iterrows():
-        ax_df = axes[i][0]
-        ax_hrfl = axes[i][1]
-        ax_lrfl = axes[i][2]
-        ax_dec = axes[i][3]
-        ax_hsc = axes[i][4]
-    
+        
+        if num_obj == 1:
+            ax_df = axes[0]
+            ax_hrfl = axes[1]
+            ax_lrfl = axes[2]
+            ax_dec = axes[3]
+            ax_hsc = axes[4]        
+        else:
+            ax_df = axes[i][0]
+            ax_hrfl = axes[i][1]
+            ax_lrfl = axes[i][2]
+            ax_dec = axes[i][3]
+            ax_hsc = axes[i][4]
+        
+        
         #Calculate properties of object
         coord = pixel_to_skycoord(obj['x'], obj['y'], res.lowres_final.wcs )
         
@@ -288,7 +311,7 @@ def plot_cutouts(res, obj_pd, decals_fits, save_name = None, df_size = 50, hr_si
             ax_dec.add_artist(e1)
         
         #Plot geometry of detected source
-        obj_x,obj_y = skycoord_to_pixel(coord, df_img[0].wcs)
+        obj_x,obj_y = skycoord_to_pixel(coord, df_img[0].wcs, origin = 0)
         e = Ellipse(xy=(obj_x, obj_x),
                 width=2*obj['a'],
                 height=2*obj['b'],

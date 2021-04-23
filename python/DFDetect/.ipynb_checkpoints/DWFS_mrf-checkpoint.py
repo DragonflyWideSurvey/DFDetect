@@ -41,7 +41,6 @@ def run_mrf_tile(DF_file, band, yaml_file, output_dir, hires_g_file = None, hire
     band ('G' or 'R'): which bands to run mrf on
     '''
     #Currently they are all g band but will need to add additional identifier for which band in future
-    img_lowres = tile_dir + tile_name+'_%s.fits'%band.lower()
     
     if band == 'g' and hires_g_file == None:
         print ('When using g band must supply at least g band hi-res file')
@@ -64,8 +63,8 @@ def run_mrf_tile(DF_file, band, yaml_file, output_dir, hires_g_file = None, hire
     #if mast catalog exists use mrf in skip_mast mode
     if mast_file != None:
         skip_mast = True
-        ps1_cat = Table.read(master_mast_catalog, format = 'csv')
-        df_wcs = WCS(fits.getheader(img_lowres))
+        ps1_cat = Table.read(mast_file, format = 'csv')
+        df_wcs = WCS(fits.getheader(DF_file))
         ps1_cat.add_columns([Column(data = df_wcs.wcs_world2pix(ps1_cat['raMean'], ps1_cat['decMean'], 0)[0], name='x_ps1'), 
         Column(data = df_wcs.wcs_world2pix(ps1_cat['raMean'], ps1_cat['decMean'], 0)[1], name='y_ps1')])
             
@@ -80,7 +79,7 @@ def run_mrf_tile(DF_file, band, yaml_file, output_dir, hires_g_file = None, hire
     
     #run mrf
     task = MrfTask(yaml_file)
-    results = task.run(img_lowres, hires_g_file, hires_r_file, None, output_name=output_dir +'%s'%band.lower(), verbose=verbose, wide_psf = True, skip_mast = skip_mast, **mrf_task_kwargs)
+    results = task.run(DF_file, hires_g_file, hires_r_file, None, output_name=output_dir +'%s'%band.lower(), verbose=verbose, wide_psf = True, skip_mast = skip_mast, **mrf_task_kwargs)
         
     if display_result or save_fig:
         from mrf.display import display_single
@@ -94,7 +93,7 @@ def run_mrf_tile(DF_file, band, yaml_file, output_dir, hires_g_file = None, hire
 
         plt.subplots_adjust(wspace=0.05)
         if save_fig:
-            plt.savefig(mrf_dir + 'mrf_result_%s.png'%band.lower(),bbox_inches = 'tight')
+            plt.savefig(output_dir + 'mrf_result_%s.png'%band.lower(),bbox_inches = 'tight')
             
         if not display_result:
             plt.clf()
@@ -104,7 +103,7 @@ def run_mrf_tile(DF_file, band, yaml_file, output_dir, hires_g_file = None, hire
     del task
     plt.close()
     gc.collect()
-
+    return results
 
 def run_mrf_tile_yale_server(tile_name, mrf_dir, band, yaml_file = None, use_two_bands = True, display_result = False, skip_mast = True,save_fig = True,verbose = True, copy_to_final = True, mrf_task_kwargs = {}):
     '''

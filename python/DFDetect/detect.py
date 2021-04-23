@@ -14,9 +14,8 @@ import pandas as pd
 
 from mrf import celestial,display
 
-from unagi import hsc,task
-
-pdr2 = hsc.Hsc(dr='pdr2',rerun = 'pdr2_wide')
+#from unagi import hsc,task
+#pdr2 = hsc.Hsc(dr='pdr2')
 
 
 def detect_sources(data,snr, band, wcs_cur, mask = None, search_sdss = True, search_radius = 4.,sep_bkg_kwargs = {}, sep_extract_kwargs = {}, plot_sources = True, save_plot = None,photo_z = True):
@@ -65,8 +64,7 @@ def detect_sources(data,snr, band, wcs_cur, mask = None, search_sdss = True, sea
     bkg = sep.Background(data, mask=mask, **sep_bkg_kwargs)
     obj_tab = sep.extract(data - bkg.back(), snr, err=bkg.rms(), **sep_extract_kwargs )
     obj_pd = pd.DataFrame(obj_tab)
-    obj_pd['x']
-    obj_pd['y']
+
     
     #####
     # Run simple cuts to remove unwanted sources 
@@ -81,8 +79,7 @@ def detect_sources(data,snr, band, wcs_cur, mask = None, search_sdss = True, sea
         obj_pd = obj_pd.query('mask_phot < 1')
 
     obj_pd = obj_pd.reset_index(drop = True)
-    coord_all =  pixel_to_skycoord(obj_pd['x']+1, obj_pd['y']+1, wcs_cur)
-    
+    coord_all =  pixel_to_skycoord(obj_pd['x']+0.5, obj_pd['y']+0.5, wcs_cur)
     obj_pd['ra'] = coord_all.ra.deg
     obj_pd['dec'] = coord_all.dec.deg
     
@@ -100,7 +97,7 @@ def detect_sources(data,snr, band, wcs_cur, mask = None, search_sdss = True, sea
         gal_specobjid = []
         
         for i, obj in obj_pd.iterrows():
-            coord = pixel_to_skycoord(obj['x']+1, obj['y']+1, wcs_cur )
+            coord = SkyCoord(ra = obj['ra']*u.deg, dec=obj['dec']*u.deg )
             tab = SDSS.query_region(coord, radius = search_radius*u.arcsec,photoobj_fields = ['ra','dec','objid','mode','type', 'psfMag_g', 'psfMag_r'])
     
             if tab is None:
@@ -238,7 +235,7 @@ def plot_cutouts(res, obj_pd, decals_fits, save_name = None, df_size = 50, hr_si
         
         
         #Calculate properties of object
-        coord = pixel_to_skycoord(obj['x'], obj['y'], res.lowres_final.wcs )
+        coord = SkyCoord(ra = obj['ra']*u.deg, dec = obj['dec']*u.deg)
         
         
         #Get df_cutout
@@ -289,26 +286,27 @@ def plot_cutouts(res, obj_pd, decals_fits, save_name = None, df_size = 50, hr_si
         #Query and plot source from SDSS Photoobj catalog
         #Blue are galaxies, red a stars
         tab = SDSS.query_region(coord, radius = hr_size/1.5*u.arcsec,photoobj_fields = ['ra','dec','objid','mode','type'])
-        for src in tab:
-            if src['mode'] != 1: continue
+        if tab is not None:
+            for src in tab:
+                if src['mode'] != 1: continue
         
-            x,y = skycoord_to_pixel(SkyCoord(ra = src['ra']*u.deg,dec = src['dec']*u.deg), hsc_wcs)
-            e = Ellipse(xy=(x, y), width=16, height=16, angle=0,lw = 2)
-            e.set_facecolor('none')
-            if src['type'] == 3:
-                e.set_edgecolor('blue')
-            else:
-                e.set_edgecolor('red')
-            ax_hsc.add_artist(e)
+                x,y = skycoord_to_pixel(SkyCoord(ra = src['ra']*u.deg,dec = src['dec']*u.deg), hsc_wcs)
+                e = Ellipse(xy=(x, y), width=16, height=16, angle=0,lw = 2)
+                e.set_facecolor('none')
+                if src['type'] == 3:
+                    e.set_edgecolor('blue')
+                else:
+                    e.set_edgecolor('red')
+                ax_hsc.add_artist(e)
         
-            x1,y1 = skycoord_to_pixel(SkyCoord(ra = src['ra']*u.deg,dec = src['dec']*u.deg), dec_img[0].wcs)
-            e1 = Ellipse(xy=(x1, y1), width=16*0.168/0.262, height = 16*0.168/0.262, angle=0,lw = 2)
-            e1.set_facecolor('none')
-            if src['type'] == 3:
-                e1.set_edgecolor('blue')
-            else:
-                e1.set_edgecolor('red')
-            ax_dec.add_artist(e1)
+                x1,y1 = skycoord_to_pixel(SkyCoord(ra = src['ra']*u.deg,dec = src['dec']*u.deg), dec_img[0].wcs)
+                e1 = Ellipse(xy=(x1, y1), width=16*0.168/0.262, height = 16*0.168/0.262, angle=0,lw = 2)
+                e1.set_facecolor('none')
+                if src['type'] == 3:
+                    e1.set_edgecolor('blue')
+                else:
+                    e1.set_edgecolor('red')
+                ax_dec.add_artist(e1)
         
         #Plot geometry of detected source
         obj_x,obj_y = skycoord_to_pixel(coord, df_img[0].wcs, origin = 0)

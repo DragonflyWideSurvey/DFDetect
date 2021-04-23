@@ -34,7 +34,7 @@ fluxmodel:
 kernel:
   kernel_size: 8 # In original coordinate, before magnification
   kernel_edge: 1
-  nkernel: 50
+  nkernel: 25
   frac_maxflux: 0.05 # Flux limit of stars to use for PSF generation - Lower is better in general. Can tweak this for better results
   circularize: False
   show_fig: True

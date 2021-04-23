@@ -32,8 +32,80 @@ all_fields = ['G09_139.5_1', 'G12_175.5_m1','G12_178.5_m1', 'G15_213_1', 'G15_22
 
 df_as_per_pix = 2.5 #dragonfly arcseconds per pixel
 decals_as_per_pix = 0.262 #Standard decals pixel scale
+
+def run_mrf_tile(DF_file, band, yaml_file, output_dir, hires_g_file = None, hires_r_file = None, mast_file = None, use_two_bands = True, display_result = False, save_fig = True,verbose = True, mrf_task_kwargs = {}):
+    '''
+    Run mrf on a specified tile
+    tile_name (string): name of DWFS tile
+    mrf_dir (string): Directory for save mrf results
+    band ('G' or 'R'): which bands to run mrf on
+    '''
+    #Currently they are all g band but will need to add additional identifier for which band in future
     
-def run_mrf_tile(tile_name, mrf_dir, band, yaml_file = None, use_two_bands = True, display_result = False, skip_mast = True,save_fig = True,verbose = True, copy_to_final = True, mrf_task_kwargs = {}):
+    if band == 'g' and hires_g_file == None:
+        print ('When using g band must supply at least g band hi-res file')
+        return 0
+    elif band == 'r' and hires_r_file == None:
+        print ('When using r band must supply at least r band hi-res file')
+        return 0
+    
+    elif use_two_bands == True and (hires_r_file == None or hires_g_file == None):
+        print('if use_two_bands = True, must supply both g and r hi-res files')
+        return 0
+    
+    if use_two_bands == False:
+        if band == 'G':
+            hires_r_file = hires_g_file
+        if band == 'R':
+            hires_g_file = hires_r_file
+    
+    #Set up MAST catalog
+    #if mast catalog exists use mrf in skip_mast mode
+    if mast_file != None:
+        skip_mast = True
+        ps1_cat = Table.read(master_mast_catalog, format = 'csv')
+        df_wcs = WCS(fits.getheader(DF_file))
+        ps1_cat.add_columns([Column(data = df_wcs.wcs_world2pix(ps1_cat['raMean'], ps1_cat['decMean'], 0)[0], name='x_ps1'), 
+        Column(data = df_wcs.wcs_world2pix(ps1_cat['raMean'], ps1_cat['decMean'], 0)[1], name='y_ps1')])
+            
+        ps1_cat.write(os.getcwd() + '/_ps1_cat.fits', overwrite=True)
+        print ('using master MAST catalog')
+    else:
+        skip_mast = False
+        print ('Will download MAST catalog')
+    
+    if not os.path.exists(output_dir):
+        os.mkdir(output_dir)
+    
+    #run mrf
+    task = MrfTask(yaml_file)
+    results = task.run(DF_file, hires_g_file, hires_r_file, None, output_name=output_dir +'%s'%band.lower(), verbose=verbose, wide_psf = True, skip_mast = skip_mast, **mrf_task_kwargs)
+        
+    if display_result or save_fig:
+        from mrf.display import display_single
+        fig, [ax1, ax2, ax3,ax4] = plt.subplots(1, 4, figsize=(30, 12))
+        ax1 = display_single(results.lowres_input.image, ax=ax1, pixel_scale=2.0, 
+            scale_bar_length=300, scale_bar_y_offset=0.3, add_text='Low res')
+        ax2 = display_single(results.hires_img.image, ax=ax2, scale_bar=False, add_text='Hi res')
+
+        ax3 = display_single(results.lowres_model.image, ax=ax3, scale_bar=False, add_text='Model')
+        ax4 = display_single(results.lowres_final.image, ax=ax4, scale_bar=False, add_text='Residual')
+
+        plt.subplots_adjust(wspace=0.05)
+        if save_fig:
+            plt.savefig(mrf_dir + 'mrf_result_%s.png'%band.lower(),bbox_inches = 'tight')
+            
+        if not display_result:
+            plt.clf()
+        else:
+            plt.show()
+        
+    del task
+    plt.close()
+    gc.collect()
+
+
+def run_mrf_tile_yale_server(tile_name, mrf_dir, band, yaml_file = None, use_two_bands = True, display_result = False, skip_mast = True,save_fig = True,verbose = True, copy_to_final = True, mrf_task_kwargs = {}):
     '''
     Run mrf on a specified tile
     tile_name (string): name of DWFS tile

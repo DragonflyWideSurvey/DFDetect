@@ -1,7 +1,15 @@
 setup.py
 DFDetect/DWFS_mrf.py
+DFDetect/detect.py
 DFDetect/run_DWFS_mrf.py
 DFDetect.egg-info/PKG-INFO
 DFDetect.egg-info/SOURCES.txt
 DFDetect.egg-info/dependency_links.txt
 DFDetect.egg-info/top_level.txt
+DFDetect/.ipynb_checkpoints/DWFS_mrf-checkpoint.py
+DFDetect/.ipynb_checkpoints/detect-checkpoint.py
+DFDetect/.ipynb_checkpoints/run_DWFS_mrf-checkpoint.py
+DFDetect/__pycache__/DWFS_mrf.cpython-37.pyc
+DFDetect/__pycache__/DWFS_mrf.cpython-38.pyc
+DFDetect/__pycache__/detect.cpython-37.pyc
+DFDetect/__pycache__/detect.cpython-38.pyc
